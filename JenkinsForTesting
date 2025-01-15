@@ -1,0 +1,74 @@
+pipeline {
+    agent any
+    
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: '6c0e1021-47c8-454e-be37-386ec4a4b96a', url: 'https://jaeheon2-admin@bitbucket.org/capstone-visual-testing-automation/apk-katalon-test.git']])
+                echo "This build is triggered"
+            }
+        }
+        
+        stage('Pull Latest Code') {
+            steps {
+                dir('/Users/jaeheonjeong/Desktop/apk-katalon-test') {
+                    sh '''
+                        git pull origin main
+                    '''
+                }
+            }
+        }
+        
+        stage('Run Katalon Studio') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                            "/Users/jaeheonjeong/Desktop/Katalon_Studio_Engine_MacOS-9.6.0/Katalon Studio Engine.app/Contents/MacOS/katalonc" -noSplash -runMode=console -projectPath="/Users/jaeheonjeong/Desktop/apk-katalon-test/apk-katalon-test.prj" -retry=0 -testSuitePath="Test Suites/TS-01" -browserType="Android" -deviceId="emulator-5554" -executionProfile="default" -apiKey="1c530dbf-53aa-413d-b79b-cff8cf6346fd" -orgID=1153144 -testOpsProjectId=1116034 --config -proxy.auth.option=NO_PROXY -proxy.system.option=NO_PROXY -proxy.system.applyToDesiredCapabilities=true -webui.autoUpdateDrivers=true -appiumDirectory="/Users/jaeheonjeong/.npm-global/lib/node_modules/appium"
+                        '''
+                        currentBuild.result = 'SUCCESS'
+                        echo 'Test suite passed successfully.'
+                    } catch (Exception e) {
+                        echo "Test suite failed."
+                        // Allow the pipeline to continue.
+                    }
+                }
+            }
+        }
+        
+        stage('Checkout-2') {
+            steps {
+                checkout scmGit(branches: [[name: '*/test']], extensions: [], userRemoteConfigs: [[credentialsId: '6c0e1021-47c8-454e-be37-386ec4a4b96a', url: 'https://jaeheon2-admin@bitbucket.org/capstone-visual-testing-automation/apk-test.git']])
+                echo 'Cloned the repository from test branch'
+            }
+        }
+        
+        stage('Check Test Result and Manage Branches') {
+            steps {
+                script {
+                    if (currentBuild.result == 'SUCCESS') {
+                        try {
+                            sh "git checkout main"
+                            sh "git merge --strategy-option=theirs test || true" // 충돌이 있어도 실패하지 않게 설정
+            
+                            // "Nothing to commit" 상태를 처리
+                            def hasChanges = sh(script: "git status --porcelain", returnStdout: true).trim()
+                            if (hasChanges) {
+                                sh "git commit -am 'Resolved merge conflicts automatically by accepting changes from test branch'"
+                            }
+                            sh "git push origin main"
+                            echo 'Test branch merged successfully into main.'
+                        } catch (Exception e) {
+                            echo "Failed to merge test branch into main: ${e.getMessage()}"
+                            currentBuild.result = 'FAILURE'
+                        }
+                    } else {
+                        echo 'Test suite failed.'
+                        echo "Last commit by: " + sh(script: "git log -1 --pretty=format:'%an (%ae) committed %s'", returnStdout: true).trim()
+                    }
+                }
+            }
+        }
+    }
+}
