@@ -5,8 +5,9 @@ This project focuses on integrating AI-powered visual testing into the software 
 
 Key features include:
 
-Automated UI testing using AI-based visual validation.
-Integration with Katalon Studio and TestOps for test management and reporting.
-Robust CI/CD pipeline for automated test execution upon code changes.
-Enhanced software quality and accelerated development cycles.
+- Automated UI testing using AI-based visual validation.
+- Integration with Katalon Studio and TestOps for test management and reporting.
+- Robust CI/CD pipeline for automated test execution upon code changes.
+- Enhanced software quality and accelerated development cycles.
+  
 This solution addresses the challenges of traditional visual testing methods, offering scalability, reliability, and efficiency to streamline the development process.
