@@ -11,3 +11,16 @@ Key features include:
 - Enhanced software quality and accelerated development cycles.
   
 This solution addresses the challenges of traditional visual testing methods, offering scalability, reliability, and efficiency to streamline the development process.
+
+## Pipeline Diagram
+<p align="center">
+  <img src="Pipeline_diagram.png" alt="Pipeline Diagram" width="700px"/>
+
+  1. First Pipeline: It will generate new apk file when the user has a new push for the application code. Then, it will push the new apk file to testing repository. The script of Jenkins file is [here](Jenkins).
+  2. Second Pipeline: It will start testing with update apk file generated from first pipeline. It will automatically execute test suites in Katalon Studio and upload the UI screenshot to Katalon TestOps. It will send notification of the test result via Gmail and Slack. If the test result is success, it will automatically merge sub-branch and main-branch of application code. the script of Jenkins file is [here](JenkinsForTesting).
+</p>
+
+## Visual Testing Diagram
+<p align="center">
+  <img src="Visual_Testing_Diagram.jpg" alt="Visual Testing Diagram" width="700px"/>
+</p>
